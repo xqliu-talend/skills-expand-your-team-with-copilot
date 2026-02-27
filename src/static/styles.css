@@ -32,6 +32,36 @@
   --info-light: #d1ecf1;
 }
 
+/* Dark mode variables */
+body.dark-mode {
+  --primary: #3949ab;
+  --primary-light: #6f74dd;
+  --primary-dark: #1a237e;
+  --primary-text: #ffffff;
+
+  --secondary: #ffa040;
+  --secondary-light: #ffd16e;
+  --secondary-dark: #c67100;
+  --secondary-text: #ffffff;
+
+  --background: #121212;
+  --surface: #1e1e1e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #aaaaaa;
+  --border: #333333;
+  --border-light: #2a2a2a;
+  --border-focus: #444444;
+
+  --success: #4caf50;
+  --success-light: #1b3a1c;
+  --warning: #ffb74d;
+  --warning-light: #3a2e00;
+  --error: #ef5350;
+  --error-light: #3b1515;
+  --info: #4fc3f7;
+  --info-light: #0d2a35;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -298,6 +328,14 @@ button {
   transition: background-color 0.2s;
 }
 
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  background-color: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
 /* Tooltip styles */
 .tooltip {
   position: relative;
@@ -492,6 +530,8 @@ footer {
   border-radius: 20px 0 0 20px;
   font-size: 0.85rem;
   transition: all 0.3s ease;
+  background-color: var(--surface);
+  color: var(--text-primary);
 }
 
 .search-box input:focus {
@@ -617,6 +657,9 @@ footer {
   position: absolute;
   top: 10px;
   right: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 #user-status {
