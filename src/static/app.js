@@ -568,6 +568,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         `
         }
+        <button class="share-button" data-activity="${name}" aria-label="Share ${name}">🔗 Share</button>
       </div>
     `;
 
@@ -587,7 +588,121 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Add click handler for share button
+    const shareButton = activityCard.querySelector(".share-button");
+    shareButton.addEventListener("click", () => {
+      shareActivity(name, details);
+    });
+
     activitiesList.appendChild(activityCard);
+  }
+
+  // Share activity using native share API or custom dialog
+  function shareActivity(name, details) {
+    const formattedSchedule = formatSchedule(details);
+    const shortDescription = details.description.length > 120
+      ? details.description.substring(0, 120) + "..."
+      : details.description;
+    const shareText = `Check out "${name}" at Mergington High School!\n${shortDescription}\nSchedule: ${formattedSchedule}`;
+    const shareUrl = window.location.href;
+
+    if (navigator.share) {
+      navigator.share({
+        title: name,
+        text: shareText,
+        url: shareUrl,
+      }).catch((err) => {
+        if (err.name !== "AbortError") {
+          console.error("Error sharing:", err);
+        }
+      });
+    } else {
+      showShareDialog(name, shareText, shareUrl);
+    }
+  }
+
+  // Show share dialog with social sharing options
+  function showShareDialog(name, text, url) {
+    const encodedText = encodeURIComponent(text);
+    const encodedUrl = encodeURIComponent(url);
+
+    let shareDialog = document.getElementById("share-dialog");
+    if (!shareDialog) {
+      shareDialog = document.createElement("div");
+      shareDialog.id = "share-dialog";
+      shareDialog.className = "modal hidden";
+      shareDialog.innerHTML = `
+        <div class="modal-content">
+          <span class="close-share-modal">&times;</span>
+          <h3>Share Activity</h3>
+          <div class="share-buttons">
+            <a id="share-twitter" href="#" target="_blank" rel="noopener noreferrer" class="share-btn share-twitter">
+              🐦 Share on X (Twitter)
+            </a>
+            <a id="share-facebook" href="#" target="_blank" rel="noopener noreferrer" class="share-btn share-facebook">
+              📘 Share on Facebook
+            </a>
+            <a id="share-whatsapp" href="#" target="_blank" rel="noopener noreferrer" class="share-btn share-whatsapp">
+              💬 Share on WhatsApp
+            </a>
+            <button id="share-copy-link" class="share-btn share-copy">
+              📋 Copy Link
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(shareDialog);
+
+      shareDialog.querySelector(".close-share-modal").addEventListener("click", () => {
+        closeShareDialog();
+      });
+
+      shareDialog.addEventListener("click", (event) => {
+        if (event.target === shareDialog) {
+          closeShareDialog();
+        }
+      });
+    }
+
+    // Update sharing links for current activity
+    shareDialog.querySelector("#share-twitter").href =
+      `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
+    shareDialog.querySelector("#share-facebook").href =
+      `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+    shareDialog.querySelector("#share-whatsapp").href =
+      `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
+
+    // Reset and update copy link button
+    const copyBtn = shareDialog.querySelector("#share-copy-link");
+    const newCopyBtn = copyBtn.cloneNode(true);
+    copyBtn.parentNode.replaceChild(newCopyBtn, copyBtn);
+    newCopyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(url).then(() => {
+        newCopyBtn.textContent = "✓ Copied!";
+        setTimeout(() => {
+          newCopyBtn.textContent = "📋 Copy Link";
+        }, 2000);
+      }).catch(() => {
+        showMessage("Failed to copy link.", "error");
+      });
+    });
+
+    // Show dialog
+    shareDialog.classList.remove("hidden");
+    setTimeout(() => {
+      shareDialog.classList.add("show");
+    }, 10);
+  }
+
+  // Close share dialog
+  function closeShareDialog() {
+    const shareDialog = document.getElementById("share-dialog");
+    if (shareDialog) {
+      shareDialog.classList.remove("show");
+      setTimeout(() => {
+        shareDialog.classList.add("hidden");
+      }, 300);
+    }
   }
 
   // Event listeners for search and filter
